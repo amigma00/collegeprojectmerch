@@ -1,4 +1,6 @@
+import 'package:collegeprojectmerch/view/editprofile.dart';
 import 'package:collegeprojectmerch/view/hospital.dart';
+import 'package:collegeprojectmerch/view/selection.dart';
 import 'package:collegeprojectmerch/view/shop.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
 
         primarySwatch: Colors.blue,
       ),
-      home: Shop()
+      home: Hospital()
     );
   }
 }

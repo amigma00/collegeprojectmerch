@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class Hospital extends StatefulWidget {
@@ -18,65 +19,24 @@ class _HospitalState extends State<Hospital> {
     var W = context.safePercentWidth;
     var H = context.safePercentHeight;
     return Scaffold(
+        appBar: AppBar(
+          title: Text("Your Hospital"),
+        ),
         body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Card(
-          elevation: 10,
-          //color: Colors.grey,
-          margin: EdgeInsets.all(10),
-          child: Container(
-              padding: EdgeInsets.all(W * 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Card(
+              elevation: 10,
+              //color: Colors.grey,
+              margin: EdgeInsets.all(10),
+              child: Container(
+                  padding: EdgeInsets.all(W * 2),
+                  child: Column(
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex:0,
-                        child: "ABC Hospital".text.xl2.bold.make(),
-                      ),
-                      HeightBox(H * 2),
-                      Row(
-                        children: [
-                          "Available Beds : ".text.make(),
-                          Container(
-                            width: W * 14,
-                            height: H * 5,
-                            child: TextFormField(
-                              textAlign: TextAlign.center,
-                              textAlignVertical: TextAlignVertical.bottom,
-                              maxLength: 3,
-                              decoration: InputDecoration(
-                                counterText: "",
-                                border: OutlineInputBorder(),
-                                hintText: '---',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      HeightBox(H * 2),
-                      Container(
-                        //color:Colors.grey,
-                        width: W*40,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            IconButton(
-                                onPressed: () {}, icon: Icon(Icons.directions)),
-                            IconButton(onPressed: () {}, icon: Icon(Icons.phone)),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           "Status : ".text.xl.make(),
                           if (_flutter == true)
@@ -106,12 +66,46 @@ class _HospitalState extends State<Hospital> {
                           scale: 1.5,
                         ),
                       ),
+                      HeightBox(H * 2),
+                      Expanded(
+                        flex: 0,
+                        child: "ABC Hospital".text.xl2.bold.make(),
+                      ),
+                      HeightBox(H * 2),
+                      Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          "Available Beds : ".text.make(),
+                          Container(
+                            width: W * 14,
+                            height: H * 5,
+                            child: TextFormField(
+                              textAlign: TextAlign.center,
+                              textAlignVertical: TextAlignVertical.bottom,
+                              maxLength: 3,
+                              decoration: const InputDecoration(
+                                counterText: "",
+                                border: OutlineInputBorder(),
+                                hintText: '---',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      HeightBox(H * 2),
+                      IconButton(
+                          onPressed: () {}, icon: Icon(Icons.pin_drop_rounded)),
+                      IconButton(
+                          onPressed: () {}, icon: Icon(Icons.phone)),
+                      TextField(
+                        decoration: InputDecoration(hintText: "City"),
+                      ),
+                      TextField(
+                        decoration: InputDecoration(hintText: "pincode"),
+                      ),
                     ],
-                  ),
-                ],
-              )),
-        ),
-      ],
-    ));
+                  )),
+            ),
+          ],
+        ));
   }
 }
