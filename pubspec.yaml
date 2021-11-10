@@ -39,6 +39,9 @@ dependencies:
   firebase_auth:
   firebase_core:
   image_picker:
+  provider:
+  google_sign_in:
+  font_awesome_flutter:
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +69,6 @@ flutter:
   assets:
     - assets/logos/download.jfif
     - assets/logos/grocery.jpg
-    - assets/images.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
