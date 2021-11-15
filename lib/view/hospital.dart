@@ -5,6 +5,9 @@ import 'dart:math';
 import 'package:collegeprojectmerch/utilities/database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -17,15 +20,16 @@ class Hospital extends StatefulWidget {
 
 class _HospitalState extends State<Hospital> {
   //late String status;
-  bool state = true;
+
   bool _flutter = true;
 
-  TextEditingController hospName=TextEditingController();
-  TextEditingController beds=TextEditingController();
-  TextEditingController phoneNo=TextEditingController();
-  TextEditingController city=TextEditingController();
-  TextEditingController pinCode=TextEditingController();
+  TextEditingController hospName = TextEditingController();
+  TextEditingController beds = TextEditingController();
+  TextEditingController phoneNo = TextEditingController();
+  TextEditingController city = TextEditingController();
+  TextEditingController pinCode = TextEditingController();
   File? image;
+
   Future pickImage(ImageSource source) async {
     try {
       final image = await ImagePicker().pickImage(source: source);
@@ -40,11 +44,55 @@ class _HospitalState extends State<Hospital> {
     }
   }
 
+  String currentAddress = 'My Address';
+  late Position currentposition;
+
+  Future _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Fluttertoast.showToast(msg: 'Please enable Your Location Service');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        Fluttertoast.showToast(msg: 'Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      Fluttertoast.showToast(
+          msg:
+              'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+
+      Placemark place = placemarks[0];
+
+      setState(() {
+        currentposition = position;
+        currentAddress =
+            " ${place.name}, ${place.street},${place.locality}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var W = context.safePercentWidth;
     var H = context.safePercentHeight;
-
     return Scaffold(
         appBar: AppBar(
           title: const Text("Your Hospital"),
@@ -102,29 +150,64 @@ class _HospitalState extends State<Hospital> {
                               Column(
                                 children: [
                                   image != null
-                                      ? ClipRRect(borderRadius: const BorderRadius.all(
-                                      Radius.circular(10)),
-                                        child: Container(  height: H * 20,
-                                          width: W * 30,
-                                          child: Image.file(
-                                    image!,
-                                    scale: 2,
-
-                                  ),
-                                        ),
-                                      )
+                                      ? ClipRRect(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(10)),
+                                          child: Container(
+                                            height: H * 20,
+                                            width: W * 30,
+                                            child: Image.file(
+                                              image!,
+                                              scale: 2,
+                                            ),
+                                          ),
+                                        )
                                       : ClipRRect(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10)),
-                                    child: Image.asset(
-                                            "assets/images.png",
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(10)),
+                                          child: Image.asset(
+                                            "assets/logos/images.png",
                                             scale: 2,
                                           ),
-                                  ),
+                                        ),
                                   MaterialButton(
                                     color: Colors.blue,
                                     onPressed: () {
-                                      pickImage(ImageSource.camera);
+                                      showModalBottomSheet<void>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            height: H*18,
+                                            //color: Colors.amber,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                              children: <Widget>[
+                                                ListTile(
+                                                  title: const Text('Camera'),
+                                                  leading: const Icon(
+                                                      Icons.camera_alt_rounded),
+                                                  onTap: () {
+                                                    pickImage(
+                                                        ImageSource.camera);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                  title: const Text('Gallery'),
+                                                  leading: const Icon(
+                                                      Icons.add_to_photos_rounded),
+                                                  onTap: () {
+                                                    pickImage(
+                                                        ImageSource.gallery);
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
                                     },
                                     child: "Edit".text.make(),
                                   )
@@ -137,7 +220,8 @@ class _HospitalState extends State<Hospital> {
                                   SizedBox(
                                     width: W * 14,
                                     height: H * 5,
-                                    child: TextFormField(controller: beds,
+                                    child: TextFormField(
+                                      controller: beds,
                                       keyboardType: TextInputType.number,
                                       textAlign: TextAlign.center,
                                       textAlignVertical:
@@ -168,7 +252,8 @@ class _HospitalState extends State<Hospital> {
                           HeightBox(H * 2),
                           SizedBox(
                             height: H * 6,
-                            child: TextFormField(controller: hospName,
+                            child: TextFormField(
+                              controller: hospName,
                               //keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
                               textAlignVertical: TextAlignVertical.bottom,
@@ -196,9 +281,10 @@ class _HospitalState extends State<Hospital> {
                           ),
                           HeightBox(H * 2),
                           SizedBox(
-                            height: H * 6,
+                            height: H * 15,
                             child: TextFormField(
-                              maxLength: 10,
+                              maxLines: 5,
+                              //maxLength: 10,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
                               textAlignVertical: TextAlignVertical.bottom,
@@ -210,7 +296,9 @@ class _HospitalState extends State<Hospital> {
                                 filled: true,
                                 fillColor: Colors.white,
                                 suffixIcon: IconButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      _determinePosition();
+                                    },
                                     icon: const Icon(
                                       Icons.pin_drop_rounded,
                                       color: Colors.blue,
@@ -226,14 +314,15 @@ class _HospitalState extends State<Hospital> {
                                     borderSide: BorderSide(
                                         color: Colors.black, width: 2)),
                                 counterText: "",
-                                hintText: '         Location',
+                                hintText: currentAddress,
                               ),
                             ),
                           ),
                           HeightBox(H * 2),
                           SizedBox(
                             height: H * 6,
-                            child: TextFormField(controller: phoneNo,
+                            child: TextFormField(
+                              controller: phoneNo,
                               maxLength: 10,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
@@ -263,7 +352,8 @@ class _HospitalState extends State<Hospital> {
                           HeightBox(H * 2),
                           SizedBox(
                             height: H * 6,
-                            child: TextFormField(controller: city,
+                            child: TextFormField(
+                              controller: city,
                               textAlign: TextAlign.center,
                               textAlignVertical: TextAlignVertical.bottom,
                               decoration: const InputDecoration(
@@ -291,7 +381,8 @@ class _HospitalState extends State<Hospital> {
                           HeightBox(H * 2),
                           SizedBox(
                             height: H * 6,
-                            child: TextFormField(controller: pinCode,
+                            child: TextFormField(
+                              controller: pinCode,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
                               textAlignVertical: TextAlignVertical.bottom,
@@ -325,7 +416,10 @@ class _HospitalState extends State<Hospital> {
                   minWidth: W * 30,
                   //height: H * 7,
                   color: Colors.orange,
-                  onPressed: () {createHosp(hospName.text, hospName.text, beds.text, phoneNo.text, city.text, pinCode.text);},
+                  onPressed: () {
+                    createHosp(hospName.text, hospName.text, beds.text,currentAddress,
+                        phoneNo.text, city.text, pinCode.text,currentposition.longitude,currentposition.latitude,_flutter);
+                  },
                   child: "Save".text.make(),
                 ),
               ],

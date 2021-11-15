@@ -1,3 +1,4 @@
+import 'package:collegeprojectmerch/view/login.dart';
 import 'package:collegeprojectmerch/view/selection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,32 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if (snapshot.hasData) {
             return Selection();
           } else
-            return Center(child: SignupWidget());
+            return LoginScreen();
         });
   }
 }
-class SignupWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final provider =
-                  Provider.of<GoogleSignInProvider>(context, listen: false);
-                  provider.googlelogin();
-                },
-                label: Text("Sign in With Google"),
-                icon: FaIcon(FontAwesomeIcons.google),
-              ),
-            )
-          ])),
-    );
-  }
-}
+
 
