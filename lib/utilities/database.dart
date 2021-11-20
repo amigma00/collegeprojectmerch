@@ -1,30 +1,50 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 createHosp(String collection, hospName, beds, location, phoneNo, city, pinCode,
-    double longitude, latitude, bool accha) async {
+    email, piclink, double longitude, latitude, bool accha) async {
   await FirebaseFirestore.instance.collection('Hospital').doc(hospName).set({
     'name': hospName,
     'beds': beds,
-    'loaction': location,
+    'location': location,
     'phoneno': phoneNo,
-    'ciy': city,
+    'city': city,
     'pincode': pinCode,
+    'email': email,
+    'piclink': piclink,
     'longitude': longitude,
     'latitude': latitude,
-    'status':accha
+    'status': accha,
   });
 }
 
-createShop(String collection, shopName, location, phoneNo, city, pinCode,
+boolhos(String hospName, bool accha) async {
+  await FirebaseFirestore.instance
+      .collection('Hospital')
+      .doc(hospName)
+      .update({'status': accha});
+}
+
+boolsho(String shopName, bool accha) async {
+  await FirebaseFirestore.instance
+      .collection('Shop')
+      .doc(shopName)
+      .update({'status': accha});
+}
+
+createShop(String collection, shopName, location, phoneNo, city, pinCode, email, piclink,
     double longitude, latitude, bool accha) async {
   await FirebaseFirestore.instance.collection('Shop').doc(shopName).set({
     'name': shopName,
-    'loaction': location,
+    'location': location,
     'phoneno': phoneNo,
-    'ciy': city,
+    'city': city,
     'pincode': pinCode,
+    'email': email,
+    'piclink': piclink,
     'longitude': longitude,
     'latitude': latitude,
-    'status':accha
+    'status': accha
   });
 }
+
+// createTempHosp()async{String
