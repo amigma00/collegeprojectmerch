@@ -1,5 +1,6 @@
 import 'package:collegeprojectmerch/view/hospital.dart';
 import 'package:collegeprojectmerch/view/shop.dart';
+import 'package:collegeprojectmerch/view/restaurant.dart';
 import 'package:flutter/material.dart';
 import 'package:velocity_x/src/extensions/context_ext.dart';
 import 'package:velocity_x/src/extensions/string_ext.dart';
@@ -30,12 +31,14 @@ class _SelectionState extends State<Selection> {
                 minWidth: W * 30,
                 height: H * 7,
                 color: Colors.blue,
-                onPressed: () { Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => const Hospital(),
-                  ),
-                );},
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => const Hospital(),
+                    ),
+                  );
+                },
                 child: "Hospital".text.make(),
               ),
               MaterialButton(
@@ -51,6 +54,20 @@ class _SelectionState extends State<Selection> {
                   );
                 },
                 child: "Shop".text.make(),
+              ),
+              MaterialButton(
+                minWidth: W * 30,
+                height: H * 7,
+                color: Colors.orange,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => const Restaurant(),
+                    ),
+                  );
+                },
+                child: "Restaurant".text.make(),
               ),
             ],
           ),
