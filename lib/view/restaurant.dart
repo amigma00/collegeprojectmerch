@@ -148,7 +148,7 @@ class _RestaurantState extends State<Restaurant> {
                             city.text = h['city'];
                             pinCode.text = h['pincode'];
                             location.text = h['location'];
-                            //bool _flutter = h['status'];
+                            bool _flutter = h['status'];
                             return Card(
                               color: Colors.grey[350],
                               shape: RoundedRectangleBorder(
@@ -900,7 +900,7 @@ class _RestaurantState extends State<Restaurant> {
                   //height: H * 7,
                   color: Colors.orange,
                   onPressed: () async {
-                    await uploadImage(file!);
+                   await uploadImage(file!);
                     print(downloadURL);
 
                     await createRest(

@@ -56,10 +56,10 @@ boolhos(String hospName, bool accha) async {
       .update({'status': accha});
 }
 
-boolres(String hospName, bool accha) async {
+boolres(String restName, bool accha) async {
   await FirebaseFirestore.instance
-      .collection('Restarant')
-      .doc(hospName)
+      .collection('Restaurant')
+      .doc(restName)
       .update({'status': accha});
 }
 
