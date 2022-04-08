@@ -21,57 +21,62 @@ class _SelectionState extends State<Selection> {
       appBar: AppBar(
         backgroundColor: Colors.blue,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              MaterialButton(
-                minWidth: W * 30,
-                height: H * 7,
-                color: Colors.blue,
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => const Hospital(),
-                    ),
-                  );
-                },
-                child: "Hospital".text.make(),
-              ),
-              MaterialButton(
-                minWidth: W * 30,
-                height: H * 7,
-                color: Colors.orange,
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => const Shop(),
-                    ),
-                  );
-                },
-                child: "Shop".text.make(),
-              ),
-              MaterialButton(
-                minWidth: W * 30,
-                height: H * 7,
-                color: Colors.orange,
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => const Restaurant(),
-                    ),
-                  );
-                },
-                child: "Restaurant".text.make(),
-              ),
-            ],
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            MaterialButton(
+              minWidth: W * 30,
+              height: H * 7,
+              color: Colors.blue,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const Hospital(),
+                  ),
+                );
+              },
+              child: "Hospital".text.make(),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            MaterialButton(
+              minWidth: W * 30,
+              height: H * 7,
+              color: Colors.red,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const Shop(),
+                  ),
+                );
+              },
+              child: "Shop".text.make(),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            MaterialButton(
+              minWidth: W * 30,
+              height: H * 7,
+              color: Colors.orange,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const Restaurant(),
+                  ),
+                );
+              },
+              child: "Restaurant".text.make(),
+            ),
+          ],
+        ),
       ),
     );
   }
