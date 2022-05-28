@@ -33,6 +33,7 @@ class _RestaurantState extends State<Restaurant> {
   TextEditingController phoneNo = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController pinCode = TextEditingController();
+  TextEditingController upiController = TextEditingController();
   TextEditingController location = TextEditingController();
   File? file;
   String? downloadURL;
@@ -148,6 +149,7 @@ class _RestaurantState extends State<Restaurant> {
                             city.text = h['city'];
                             pinCode.text = h['pincode'];
                             location.text = h['location'];
+                            upiController.text = h['upi'];
                             bool _flutter = h['status'];
                             return Card(
                               color: Colors.grey[350],
@@ -182,8 +184,8 @@ class _RestaurantState extends State<Restaurant> {
                                               onChanged: (bool value) {
                                                 setState(() {
                                                   _flutter = value;
-                                                  boolres(restName.text,
-                                                      _flutter);
+                                                  boolres(
+                                                      restName.text, _flutter);
                                                 });
                                               },
                                             ),
@@ -246,8 +248,8 @@ class _RestaurantState extends State<Restaurant> {
                                                 onPressed: () {
                                                   showModalBottomSheet<void>(
                                                     context: context,
-                                                    builder: (BuildContext
-                                                        context) {
+                                                    builder:
+                                                        (BuildContext context) {
                                                       return Container(
                                                         height: H * 18,
                                                         //color: Colors.amber,
@@ -314,35 +316,36 @@ class _RestaurantState extends State<Restaurant> {
                                                       TextInputType.number,
                                                   textAlign: TextAlign.center,
                                                   textAlignVertical:
-                                                      TextAlignVertical
-                                                          .bottom,
+                                                      TextAlignVertical.bottom,
                                                   maxLength: 3,
                                                   decoration:
                                                       const InputDecoration(
                                                     filled: true,
                                                     fillColor: Colors.white,
-                                                    focusedBorder: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius
-                                                                    .circular(
-                                                                        10)),
-                                                        borderSide:
-                                                            BorderSide(
-                                                                color: Colors
-                                                                    .red,
-                                                                width: 2)),
-                                                    enabledBorder: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius
-                                                                    .circular(
-                                                                        10)),
-                                                        borderSide:
-                                                            BorderSide(
-                                                                color: Colors
-                                                                    .black,
-                                                                width: 2)),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
                                                     counterText: "",
                                                     hintText: "---",
                                                   ),
@@ -369,16 +372,14 @@ class _RestaurantState extends State<Restaurant> {
                                               color: Colors.blue,
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.red,
                                                     width: 2)),
                                             enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.black,
                                                     width: 2)),
@@ -454,16 +455,14 @@ class _RestaurantState extends State<Restaurant> {
                                               color: Colors.blue,
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.red,
                                                     width: 2)),
                                             enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.black,
                                                     width: 2)),
@@ -488,16 +487,14 @@ class _RestaurantState extends State<Restaurant> {
                                               color: Colors.blue,
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.red,
                                                     width: 2)),
                                             enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.black,
                                                     width: 2)),
@@ -524,21 +521,53 @@ class _RestaurantState extends State<Restaurant> {
                                               color: Colors.blue,
                                             ),
                                             focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.red,
                                                     width: 2)),
                                             enabledBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(10)),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
                                                 borderSide: BorderSide(
                                                     color: Colors.black,
                                                     width: 2)),
                                             counterText: "",
                                             hintText: 'Pincode',
+                                          ),
+                                        ),
+                                      ),
+                                      HeightBox(H * 2),
+                                      SizedBox(
+                                        height: H * 6,
+                                        child: TextFormField(
+                                          controller: upiController,
+                                          keyboardType: TextInputType.number,
+                                          textAlign: TextAlign.center,
+                                          textAlignVertical:
+                                              TextAlignVertical.bottom,
+                                          maxLength: 6,
+                                          decoration: const InputDecoration(
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            prefixIcon: Icon(
+                                              Icons.edit_location_rounded,
+                                              color: Colors.blue,
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
+                                                borderSide: BorderSide(
+                                                    color: Colors.red,
+                                                    width: 2)),
+                                            enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
+                                                borderSide: BorderSide(
+                                                    color: Colors.black,
+                                                    width: 2)),
+                                            counterText: "",
+                                            hintText: 'UPI Id',
                                           ),
                                         ),
                                       ),
@@ -887,6 +916,38 @@ class _RestaurantState extends State<Restaurant> {
                                       ),
                                     ),
                                   ),
+                                  HeightBox(H * 2),
+                                  SizedBox(
+                                    height: H * 6,
+                                    child: TextFormField(
+                                      controller: upiController,
+                                      keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
+                                      textAlignVertical:
+                                          TextAlignVertical.bottom,
+                                      maxLength: 6,
+                                      decoration: const InputDecoration(
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        prefixIcon: Icon(
+                                          Icons.edit_location_rounded,
+                                          color: Colors.blue,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10)),
+                                            borderSide: BorderSide(
+                                                color: Colors.red, width: 2)),
+                                        enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10)),
+                                            borderSide: BorderSide(
+                                                color: Colors.black, width: 2)),
+                                        counterText: "",
+                                        hintText: 'UPI Id',
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               )),
                         );
@@ -900,7 +961,7 @@ class _RestaurantState extends State<Restaurant> {
                   //height: H * 7,
                   color: Colors.orange,
                   onPressed: () async {
-                   await uploadImage(file!);
+                    await uploadImage(file!);
                     print(downloadURL);
 
                     await createRest(
@@ -911,6 +972,7 @@ class _RestaurantState extends State<Restaurant> {
                         phoneNo.text,
                         city.text,
                         pinCode.text,
+                        upiController.text,
                         user.email!,
                         downloadURL,
                         currentposition.longitude,

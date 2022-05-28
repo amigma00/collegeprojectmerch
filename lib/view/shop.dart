@@ -2,12 +2,11 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collegeprojectmerch/components/loader.dart';
 import 'package:collegeprojectmerch/utilities/database.dart';
-import 'package:collegeprojectmerch/utilities/fireapi.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -31,10 +30,13 @@ class _ShopState extends State<Shop> {
   TextEditingController phoneNo = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController pinCode = TextEditingController();
+  TextEditingController upiController = TextEditingController();
   TextEditingController location = TextEditingController();
   File? file;
   String? downloadURL;
   UploadTask? task;
+
+  bool setBusy = false;
 
   Future pickImage(ImageSource source) async {
     try {
@@ -114,687 +116,913 @@ class _ShopState extends State<Shop> {
         appBar: AppBar(
           title: const Text("Your Shop"),
         ),
-        body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('Shop')
-                      .where('email', isEqualTo: user.email!)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    final abe = snapshot.hasData;
-                    if (snapshot.hasError) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (abe) {
-                      print('abe');
-                      return Card(
-                        color: Colors.grey[350],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        elevation: 10,
-                        //color: Colors.grey,
-                        margin: EdgeInsets.all(W * 4),
-                        child: Container(
-                            padding: EdgeInsets.all(W * 2),
-                            child: Column(
-                              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              //crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                //Text(h['name']),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    "Status : ".text.xl2.bold.make(),
-                                    if (_flutter == true)
-                                      "On".text.green600.xl.bold.make()
-                                    else
-                                      "Off".text.red600.xl.bold.make(),
-                                    Container(
-                                      padding: const EdgeInsets.all(0),
-                                      alignment: Alignment.topRight,
-                                      child: Switch(
-                                        value: _flutter,
-                                        activeColor: Colors.red,
-                                        inactiveTrackColor: Colors.grey,
-                                        onChanged: (bool value) {
-                                          setState(() {
-                                            _flutter = value;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
+        body: setBusy == false
+            ? GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).unfocus();
+                },
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('Shop')
+                              .where('email', isEqualTo: user.email!)
+                              .snapshots(),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            final abe = snapshot.hasData;
+                            if (snapshot.hasError) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                            if (abe) {
+                              print('abe');
+                              return Card(
+                                color: Colors.grey[350],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
                                 ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Column(
+                                elevation: 10,
+                                //color: Colors.grey,
+                                margin: EdgeInsets.all(W * 4),
+                                child: Container(
+                                    padding: EdgeInsets.all(W * 2),
+                                    child: Column(
+                                      //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      //crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        file != null
-                                            ? ClipRRect(
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(10)),
-                                                child: Image.file(
-                                                  file!,
-                                                  scale: 2,
-                                                ),
-                                              )
-                                            : ClipRRect(
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(10)),
-                                                child: Image.asset(
-                                                  "assets/logos/images.png",
-                                                  scale: 4,
-                                                ),
+                                        //Text(h['name']),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            "Status : ".text.xl2.bold.make(),
+                                            if (_flutter == true)
+                                              "On".text.green600.xl.bold.make()
+                                            else
+                                              "Off".text.red600.xl.bold.make(),
+                                            Container(
+                                              padding: const EdgeInsets.all(0),
+                                              alignment: Alignment.topRight,
+                                              child: Switch(
+                                                value: _flutter,
+                                                activeColor: Colors.red,
+                                                inactiveTrackColor: Colors.grey,
+                                                onChanged: (bool value) {
+                                                  setState(() {
+                                                    _flutter = value;
+                                                  });
+                                                },
                                               ),
-                                        MaterialButton(
-                                          color: Colors.blue,
-                                          onPressed: () {
-                                            showModalBottomSheet<void>(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return Container(
-                                                  height: H * 18,
-                                                  //color: Colors.amber,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .stretch,
-                                                    children: <Widget>[
-                                                      ListTile(
-                                                        title: const Text(
-                                                            'Camera'),
-                                                        leading: const Icon(Icons
-                                                            .camera_alt_rounded),
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          pickImage(ImageSource
-                                                              .camera);
-                                                        },
-                                                      ),
-                                                      ListTile(
-                                                        title: const Text(
-                                                            'Gallery'),
-                                                        leading: const Icon(Icons
-                                                            .add_to_photos_rounded),
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          pickImage(ImageSource
-                                                              .gallery);
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: "Edit".text.make(),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                HeightBox(H * 2),
-                                SizedBox(
-                                  height: H * 6,
-                                  child: TextFormField(
-                                    controller: shopName,
-                                    //keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      prefixIcon: Icon(
-                                        Icons.local_hospital_rounded,
-                                        color: Colors.blue,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.red, width: 2)),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 2)),
-                                      counterText: "",
-                                      hintText: 'Shop Name',
-                                    ),
-                                  ),
-                                ),
-                                HeightBox(H * 2),
-                                SizedBox(
-                                  height: H * 10,
-                                  child: TextFormField(
-                                    controller: location,
-                                    maxLines: 5,
-                                    //maxLength: 10,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    decoration: InputDecoration(
-                                      prefixIcon: const Icon(
-                                        Icons.eleven_mp,
-                                        color: Colors.white,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      suffixIcon: IconButton(
-                                          onPressed: () {
-                                            _determinePosition();
-                                          },
-                                          icon: const Icon(
-                                            Icons.pin_drop_rounded,
-                                            color: Colors.blue,
-                                          )),
-                                      focusedBorder: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.red, width: 2)),
-                                      enabledBorder: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 2)),
-                                      counterText: "",
-                                      hintText: currentAddress,
-                                    ),
-                                  ),
-                                ),
-                                HeightBox(H * 2),
-                                SizedBox(
-                                  height: H * 6,
-                                  child: TextFormField(
-                                    controller: phoneNo,
-                                    maxLength: 10,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      prefixIcon: Icon(
-                                        Icons.phone,
-                                        color: Colors.blue,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.red, width: 2)),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 2)),
-                                      counterText: "",
-                                      hintText: 'Phone Number',
-                                    ),
-                                  ),
-                                ),
-                                HeightBox(H * 2),
-                                SizedBox(
-                                  height: H * 6,
-                                  child: TextFormField(
-                                    controller: city,
-                                    textAlign: TextAlign.center,
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      prefixIcon: Icon(
-                                        Icons.location_city_rounded,
-                                        color: Colors.blue,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.red, width: 2)),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 2)),
-                                      counterText: "",
-                                      hintText: 'City',
-                                    ),
-                                  ),
-                                ),
-                                HeightBox(H * 2),
-                                SizedBox(
-                                  height: H * 6,
-                                  child: TextFormField(
-                                    controller: pinCode,
-                                    keyboardType: TextInputType.number,
-                                    textAlign: TextAlign.center,
-                                    textAlignVertical: TextAlignVertical.bottom,
-                                    maxLength: 6,
-                                    decoration: const InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      prefixIcon: Icon(
-                                        Icons.edit_location_rounded,
-                                        color: Colors.blue,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.red, width: 2)),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10)),
-                                          borderSide: BorderSide(
-                                              color: Colors.black, width: 2)),
-                                      counterText: "",
-                                      hintText: 'Pincode',
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                      );
-                    } else if (snapshot.hasData) {
-                      print("expand");
-                      return Expanded(
-                        child: ListView(
-                          children: snapshot.data!.docs.map((h) {
-                            shopName.text = h['name'];
-                            phoneNo.text = h['phoneno'];
-                            city.text = h['city'];
-                            pinCode.text = h['pincode'];
-                            location.text = h['location'];
-                            //bool _flutter = h['status'];
-                            return Card(
-                              color: Colors.grey[350],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              elevation: 10,
-                              //color: Colors.grey,
-                              margin: EdgeInsets.all(W * 4),
-                              child: Container(
-                                  padding: EdgeInsets.all(W * 2),
-                                  child: Column(
-                                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    //crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          "Status : ".text.xl2.bold.make(),
-                                          if (h['status'] == true)
-                                            "On".text.green600.xl.bold.make()
-                                          else
-                                            "Off".text.red600.xl.bold.make(),
-                                          Container(
-                                            padding: const EdgeInsets.all(0),
-                                            alignment: Alignment.topRight,
-                                            child: Switch(
-                                              value: h['status'],
-                                              activeColor: Colors.red,
-                                              inactiveTrackColor: Colors.grey,
-                                              onChanged: (bool value) {
-                                                setState(() {
-                                                  _flutter = value;
-                                                  boolsho(
-                                                      shopName.text, _flutter);
-                                                });
-                                              },
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Column(
-                                            children: [
-                                              h['piclink'] != null
-                                                  ? ClipRRect(
-                                                      borderRadius:
-                                                          const BorderRadius
-                                                                  .all(
-                                                              Radius.circular(
-                                                                  10)),
-                                                      child: Container(
-                                                        height: H * 20,
-                                                        width: W * 30,
-                                                        child: Image.network(
-                                                          h['piclink'],
-                                                          scale: 2,
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : file != null
-                                                      ? ClipRRect(
-                                                          borderRadius:
-                                                              const BorderRadius
-                                                                      .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          10)),
-                                                          child: Container(
-                                                            height: H * 20,
-                                                            width: W * 30,
-                                                            child: Image.file(
-                                                              file!,
-                                                              scale: 2,
-                                                            ),
-                                                          ),
-                                                        )
-                                                      : ClipRRect(
-                                                          borderRadius:
-                                                              const BorderRadius
-                                                                      .all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          10)),
-                                                          child: Image.asset(
-                                                            "assets/logos/images.png",
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                file != null
+                                                    ? ClipRRect(
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .all(
+                                                                Radius.circular(
+                                                                    10)),
+                                                        child: SizedBox(
+                                                          height: 100,
+                                                          child: Image.file(
+                                                            file!,
                                                             scale: 2,
                                                           ),
                                                         ),
-                                              MaterialButton(
-                                                color: Colors.blue,
-                                                onPressed: () {
-                                                  showModalBottomSheet<void>(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return Container(
-                                                        height: H * 18,
-                                                        //color: Colors.amber,
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .stretch,
-                                                          children: <Widget>[
-                                                            ListTile(
-                                                              title: const Text(
-                                                                  'Camera'),
-                                                              leading: const Icon(
-                                                                  Icons
-                                                                      .camera_alt_rounded),
-                                                              onTap: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                                pickImage(
-                                                                    ImageSource
-                                                                        .camera);
-                                                              },
-                                                            ),
-                                                            ListTile(
-                                                              title: const Text(
-                                                                  'Gallery'),
-                                                              leading: const Icon(
-                                                                  Icons
-                                                                      .add_to_photos_rounded),
-                                                              onTap: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                                pickImage(
-                                                                    ImageSource
-                                                                        .gallery);
-                                                              },
-                                                            ),
-                                                          ],
+                                                      )
+                                                    : ClipRRect(
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .all(
+                                                                Radius.circular(
+                                                                    10)),
+                                                        child: Image.asset(
+                                                          "assets/logos/images.png",
+                                                          scale: 4,
                                                         ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                child: "Edit".text.make(),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      HeightBox(H * 2),
-                                      SizedBox(
-                                        height: H * 6,
-                                        child: TextFormField(
-                                          controller: shopName,
-                                          //keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                          textAlignVertical:
-                                              TextAlignVertical.bottom,
-                                          decoration: const InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white,
-                                            prefixIcon: Icon(
-                                              Icons.local_hospital_rounded,
-                                              color: Colors.blue,
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.red,
-                                                    width: 2)),
-                                            enabledBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2)),
-                                            counterText: "",
-                                            hintText: 'Hospital Name',
-                                          ),
-                                        ),
-                                      ),
-                                      HeightBox(H * 2),
-                                      SizedBox(
-                                        height: H * 15,
-                                        child: TextFormField(
-                                          controller: location,
-                                          maxLines: 5,
-                                          //maxLength: 10,
-                                          keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                          textAlignVertical:
-                                              TextAlignVertical.bottom,
-                                          decoration: InputDecoration(
-                                            prefixIcon: const Icon(
-                                              Icons.eleven_mp,
-                                              color: Colors.white,
-                                            ),
-                                            filled: true,
-                                            fillColor: Colors.white,
-                                            suffixIcon: IconButton(
-                                                onPressed: () {
-                                                  _determinePosition();
-                                                },
-                                                icon: const Icon(
-                                                  Icons.pin_drop_rounded,
+                                                      ),
+                                                MaterialButton(
                                                   color: Colors.blue,
-                                                )),
-                                            focusedBorder:
-                                                const OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                10)),
-                                                    borderSide: BorderSide(
-                                                        color: Colors.red,
-                                                        width: 2)),
-                                            enabledBorder:
-                                                const OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                10)),
-                                                    borderSide: BorderSide(
-                                                        color: Colors.black,
-                                                        width: 2)),
-                                            counterText: "",
-                                            hintText: currentAddress,
-                                          ),
-                                        ),
-                                      ),
-                                      HeightBox(H * 2),
-                                      SizedBox(
-                                        height: H * 6,
-                                        child: TextFormField(
-                                          controller: phoneNo,
-                                          maxLength: 10,
-                                          keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                          textAlignVertical:
-                                              TextAlignVertical.bottom,
-                                          decoration: const InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white,
-                                            prefixIcon: Icon(
-                                              Icons.phone,
-                                              color: Colors.blue,
+                                                  onPressed: () {
+                                                    showModalBottomSheet<void>(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return SizedBox(
+                                                          height: H * 18,
+                                                          //color: Colors.amber,
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .stretch,
+                                                            children: <Widget>[
+                                                              ListTile(
+                                                                title: const Text(
+                                                                    'Camera'),
+                                                                leading: const Icon(
+                                                                    Icons
+                                                                        .camera_alt_rounded),
+                                                                onTap: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  pickImage(
+                                                                      ImageSource
+                                                                          .camera);
+                                                                },
+                                                              ),
+                                                              ListTile(
+                                                                title: const Text(
+                                                                    'Gallery'),
+                                                                leading: const Icon(
+                                                                    Icons
+                                                                        .add_to_photos_rounded),
+                                                                onTap: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  pickImage(
+                                                                      ImageSource
+                                                                          .gallery);
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: "Edit".text.make(),
+                                                )
+                                              ],
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.red,
-                                                    width: 2)),
-                                            enabledBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2)),
-                                            counterText: "",
-                                            hintText: 'Phone Number',
-                                          ),
+                                          ],
                                         ),
-                                      ),
-                                      HeightBox(H * 2),
-                                      SizedBox(
-                                        height: H * 6,
-                                        child: TextFormField(
-                                          controller: city,
-                                          textAlign: TextAlign.center,
-                                          textAlignVertical:
-                                              TextAlignVertical.bottom,
-                                          decoration: const InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white,
-                                            prefixIcon: Icon(
-                                              Icons.location_city_rounded,
-                                              color: Colors.blue,
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 6,
+                                          child: TextFormField(
+                                            controller: shopName,
+                                            //keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            decoration: const InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              prefixIcon: Icon(
+                                                Icons.local_hospital_rounded,
+                                                color: Colors.blue,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2)),
+                                              counterText: "",
+                                              hintText: 'Shop Name',
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.red,
-                                                    width: 2)),
-                                            enabledBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2)),
-                                            counterText: "",
-                                            hintText: 'City',
                                           ),
                                         ),
-                                      ),
-                                      HeightBox(H * 2),
-                                      SizedBox(
-                                        height: H * 6,
-                                        child: TextFormField(
-                                          controller: pinCode,
-                                          keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                          textAlignVertical:
-                                              TextAlignVertical.bottom,
-                                          maxLength: 6,
-                                          decoration: const InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white,
-                                            prefixIcon: Icon(
-                                              Icons.edit_location_rounded,
-                                              color: Colors.blue,
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 10,
+                                          child: TextFormField(
+                                            controller: location,
+                                            maxLines: 5,
+                                            //maxLength: 10,
+                                            keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            decoration: InputDecoration(
+                                              prefixIcon: const Icon(
+                                                Icons.eleven_mp,
+                                                color: Colors.white,
+                                              ),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              suffixIcon: IconButton(
+                                                  onPressed: () {
+                                                    _determinePosition();
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.pin_drop_rounded,
+                                                    color: Colors.blue,
+                                                  )),
+                                              focusedBorder:
+                                                  const OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  10)),
+                                                      borderSide: BorderSide(
+                                                          color: Colors.red,
+                                                          width: 2)),
+                                              enabledBorder:
+                                                  const OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  10)),
+                                                      borderSide: BorderSide(
+                                                          color: Colors.black,
+                                                          width: 2)),
+                                              counterText: "",
+                                              hintText: currentAddress,
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.red,
-                                                    width: 2)),
-                                            enabledBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2)),
-                                            counterText: "",
-                                            hintText: 'Pincode',
                                           ),
                                         ),
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 6,
+                                          child: TextFormField(
+                                            controller: phoneNo,
+                                            maxLength: 10,
+                                            keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            decoration: const InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              prefixIcon: Icon(
+                                                Icons.phone,
+                                                color: Colors.blue,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2)),
+                                              counterText: "",
+                                              hintText: 'Phone Number',
+                                            ),
+                                          ),
+                                        ),
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 6,
+                                          child: TextFormField(
+                                            controller: city,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            decoration: const InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              prefixIcon: Icon(
+                                                Icons.location_city_rounded,
+                                                color: Colors.blue,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2)),
+                                              counterText: "",
+                                              hintText: 'City',
+                                            ),
+                                          ),
+                                        ),
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 6,
+                                          child: TextFormField(
+                                            controller: pinCode,
+                                            keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            maxLength: 6,
+                                            decoration: const InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              prefixIcon: Icon(
+                                                Icons.edit_location_rounded,
+                                                color: Colors.blue,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2)),
+                                              counterText: "",
+                                              hintText: 'Pincode',
+                                            ),
+                                          ),
+                                        ),
+                                        HeightBox(H * 2),
+                                        SizedBox(
+                                          height: H * 6,
+                                          child: TextFormField(
+                                            controller: upiController,
+                                            keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            textAlignVertical:
+                                                TextAlignVertical.bottom,
+                                            maxLength: 6,
+                                            decoration: const InputDecoration(
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                              prefixIcon: Icon(
+                                                Icons.edit_location_rounded,
+                                                color: Colors.blue,
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.red,
+                                                      width: 2)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.black,
+                                                      width: 2)),
+                                              counterText: "",
+                                              hintText: 'UPI Id',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                              );
+                            } else if (snapshot.hasData) {
+                              print("expand");
+                              return Expanded(
+                                child: ListView(
+                                  children: snapshot.data!.docs.map((h) {
+                                    shopName.text = h['name'];
+                                    phoneNo.text = h['phoneno'];
+                                    city.text = h['city'];
+                                    pinCode.text = h['pincode'];
+                                    location.text = h['location'];
+                                    //bool _flutter = h['status'];
+                                    return Card(
+                                      color: Colors.grey[350],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
                                       ),
-                                    ],
-                                  )),
-                            );
-                          }).toList(),
-                        ),
-                      );
-                    } else
-                      return CircularProgressIndicator();
-                  }),
-              MaterialButton(
-                minWidth: W * 30,
-                //height: H * 7,
-                color: Colors.orange,
-                onPressed: () async {
-                 await uploadImage(file!);
-                  print(downloadURL);
+                                      elevation: 10,
+                                      //color: Colors.grey,
+                                      margin: EdgeInsets.all(W * 4),
+                                      child: Container(
+                                          padding: EdgeInsets.all(W * 2),
+                                          child: Column(
+                                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            //crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  "Status : "
+                                                      .text
+                                                      .xl2
+                                                      .bold
+                                                      .make(),
+                                                  if (h['status'] == true)
+                                                    "On"
+                                                        .text
+                                                        .green600
+                                                        .xl
+                                                        .bold
+                                                        .make()
+                                                  else
+                                                    "Off"
+                                                        .text
+                                                        .red600
+                                                        .xl
+                                                        .bold
+                                                        .make(),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(0),
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: Switch(
+                                                      value: h['status'],
+                                                      activeColor: Colors.red,
+                                                      inactiveTrackColor:
+                                                          Colors.grey,
+                                                      onChanged: (bool value) {
+                                                        setState(() {
+                                                          _flutter = value;
+                                                          boolsho(shopName.text,
+                                                              _flutter);
+                                                        });
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceAround,
+                                                children: [
+                                                  Column(
+                                                    children: [
+                                                      h['piclink'] != null
+                                                          ? ClipRRect(
+                                                              borderRadius:
+                                                                  const BorderRadius
+                                                                          .all(
+                                                                      Radius.circular(
+                                                                          10)),
+                                                              child: SizedBox(
+                                                                height: H * 20,
+                                                                width: W * 30,
+                                                                child: Image
+                                                                    .network(
+                                                                  h['piclink'],
+                                                                  scale: 2,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : file != null
+                                                              ? ClipRRect(
+                                                                  borderRadius: const BorderRadius
+                                                                          .all(
+                                                                      Radius.circular(
+                                                                          10)),
+                                                                  child:
+                                                                      SizedBox(
+                                                                    height:
+                                                                        H * 20,
+                                                                    width:
+                                                                        W * 30,
+                                                                    child: Image
+                                                                        .file(
+                                                                      file!,
+                                                                      scale: 2,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : ClipRRect(
+                                                                  borderRadius: const BorderRadius
+                                                                          .all(
+                                                                      Radius.circular(
+                                                                          10)),
+                                                                  child: Image
+                                                                      .asset(
+                                                                    "assets/logos/images.png",
+                                                                    scale: 2,
+                                                                  ),
+                                                                ),
+                                                      MaterialButton(
+                                                        color: Colors.blue,
+                                                        onPressed: () {
+                                                          showModalBottomSheet<
+                                                              void>(
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return SizedBox(
+                                                                height: H * 18,
+                                                                //color: Colors.amber,
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .stretch,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    ListTile(
+                                                                      title: const Text(
+                                                                          'Camera'),
+                                                                      leading:
+                                                                          const Icon(
+                                                                              Icons.camera_alt_rounded),
+                                                                      onTap:
+                                                                          () {
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                        pickImage(
+                                                                            ImageSource.camera);
+                                                                      },
+                                                                    ),
+                                                                    ListTile(
+                                                                      title: const Text(
+                                                                          'Gallery'),
+                                                                      leading:
+                                                                          const Icon(
+                                                                              Icons.add_to_photos_rounded),
+                                                                      onTap:
+                                                                          () {
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                        pickImage(
+                                                                            ImageSource.gallery);
+                                                                      },
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                        child:
+                                                            "Edit".text.make(),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 6,
+                                                child: TextFormField(
+                                                  controller: shopName,
+                                                  //keyboardType: TextInputType.number,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    prefixIcon: Icon(
+                                                      Icons
+                                                          .local_hospital_rounded,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: 'Hospital Name',
+                                                  ),
+                                                ),
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 15,
+                                                child: TextFormField(
+                                                  controller: location,
+                                                  maxLines: 5,
+                                                  //maxLength: 10,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  decoration: InputDecoration(
+                                                    prefixIcon: const Icon(
+                                                      Icons.eleven_mp,
+                                                      color: Colors.white,
+                                                    ),
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    suffixIcon: IconButton(
+                                                        onPressed: () {
+                                                          _determinePosition();
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons
+                                                              .pin_drop_rounded,
+                                                          color: Colors.blue,
+                                                        )),
+                                                    focusedBorder:
+                                                        const OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        const OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: currentAddress,
+                                                  ),
+                                                ),
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 6,
+                                                child: TextFormField(
+                                                  controller: phoneNo,
+                                                  maxLength: 10,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    prefixIcon: Icon(
+                                                      Icons.phone,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: 'Phone Number',
+                                                  ),
+                                                ),
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 6,
+                                                child: TextFormField(
+                                                  controller: city,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    prefixIcon: Icon(
+                                                      Icons
+                                                          .location_city_rounded,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: 'City',
+                                                  ),
+                                                ),
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 6,
+                                                child: TextFormField(
+                                                  controller: pinCode,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  maxLength: 6,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    prefixIcon: Icon(
+                                                      Icons
+                                                          .edit_location_rounded,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: 'Pincode',
+                                                  ),
+                                                ),
+                                              ),
+                                              HeightBox(H * 2),
+                                              SizedBox(
+                                                height: H * 6,
+                                                child: TextFormField(
+                                                  controller: upiController,
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  textAlign: TextAlign.center,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.bottom,
+                                                  maxLength: 6,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    prefixIcon: Icon(
+                                                      Icons
+                                                          .edit_location_rounded,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    width: 2)),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            10)),
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .black,
+                                                                    width: 2)),
+                                                    counterText: "",
+                                                    hintText: 'UPI Id',
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )),
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          }),
+                      MaterialButton(
+                        minWidth: W * 30,
+                        //height: H * 7,
+                        color: Colors.orange,
+                        onPressed: () async {
+                          setBusy = true;
+                          await uploadImage(file!);
+                          print(downloadURL);
 
-              await    createShop(
-                      shopName.text,
-                      shopName.text,
-                      currentAddress,
-                      phoneNo.text,
-                      city.text,
-                      pinCode.text,
-                      user.email!,
-                      downloadURL,
-                      currentposition.longitude,
-                      currentposition.latitude,
-                      _flutter);
-
-                  setState(() {});
-                },
-                child: "Save".text.make(),
-              ),
-            ],
-          ),
-        ));
+                          await createShop(
+                              shopName.text,
+                              shopName.text,
+                              currentAddress,
+                              phoneNo.text,
+                              city.text,
+                              pinCode.text,
+                              user.email!,
+                              downloadURL,
+                              upiController.text,
+                              currentposition.longitude,
+                              currentposition.latitude,
+                              _flutter);
+                          setBusy = false;
+                          setState(() {});
+                        },
+                        child: "Save".text.make(),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : const Loader());
   }
 
   // @override

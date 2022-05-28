@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-createShop(String collection, shopName, location, phoneNo, city, pinCode, email, piclink,
+createShop(String collection, shopName, location, phoneNo, city, pinCode, email, piclink,upi,
     double longitude, latitude, bool accha) async {
   await FirebaseFirestore.instance.collection('Shop').doc(shopName).set({
     'name': shopName,
@@ -12,11 +12,12 @@ createShop(String collection, shopName, location, phoneNo, city, pinCode, email,
     'piclink': piclink,
     'longitude': longitude,
     'latitude': latitude,
-    'status': accha
+    'status': accha,
+    'upi':upi
   });
 }
 
-createHosp(String collection, hospName, beds, location, phoneNo, city, pinCode,
+createHosp(String collection, hospName, beds, location, phoneNo, city, pinCode,upi,
     email, piclink, double longitude, latitude, bool accha) async {
   await FirebaseFirestore.instance.collection('Hospital').doc(hospName).set({
     'name': hospName,
@@ -29,10 +30,10 @@ createHosp(String collection, hospName, beds, location, phoneNo, city, pinCode,
     'piclink': piclink,
     'longitude': longitude,
     'latitude': latitude,
-    'status': accha,
+    'status': accha,    'upi':upi
   });
 }
-createRest(String collection, restName, tables, location, phoneNo, city, pinCode,
+createRest(String collection, restName, tables, location, phoneNo, city, pinCode,upi,
     email, piclink, double longitude, latitude, bool accha) async {
   await FirebaseFirestore.instance.collection('Restaurant').doc(restName).set({
     'name': restName,
@@ -45,7 +46,7 @@ createRest(String collection, restName, tables, location, phoneNo, city, pinCode
     'piclink': piclink,
     'longitude': longitude,
     'latitude': latitude,
-    'status': accha,
+    'status': accha,    'upi':upi
   });
 }
 

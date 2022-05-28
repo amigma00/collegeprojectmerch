@@ -24,12 +24,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     ),
   );
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -41,17 +43,18 @@ class _MyHomePageState extends State<MyHomePage> {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
-            return Center(
+            return const Center(
               child: Text("Something went wrong!"),
             );
           } else if (snapshot.hasData) {
-            return Selection();
-          } else
+            return const Selection();
+          } else {
             return LoginScreen();
+          }
         });
   }
 }
